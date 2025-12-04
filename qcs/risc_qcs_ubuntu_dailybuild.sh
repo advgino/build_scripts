@@ -80,7 +80,8 @@ function build_image()
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
 	# scripts/build_release.sh -all -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
-	scripts/build_release.sh -all -qcs9075-iq-9075-evk -debug
+	scripts/build_release.sh -amss -qcs9075-iq-9075-evk -debug
+	scripts/build_release.sh -ubuntu -qcs9075-iq-9075-evk -debug
 }
 
 function generate_md5()
