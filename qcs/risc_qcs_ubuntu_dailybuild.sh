@@ -80,8 +80,30 @@ function build_image()
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
 	# scripts/build_release.sh -all -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
-	scripts/build_release.sh -amss -qcs9075-iq-9075-evk -debug
-	scripts/build_release.sh -ubuntu -qcs9075-iq-9075-evk -debug
+
+	if [ $# -gt 0 ]; then
+		case ${$1} in
+			"-amss")
+				echo "[ADV] Build: amss images"
+				script/build_release.sh -amss -qcs9075-iq-9075-evk -debug
+				;;
+			"-ubuntu")
+				echo "[ADV] Build: ubuntu images"
+				script/build_release.sh -ubuntu -qcs9075-iq-9075-evk -debug
+				;;
+			*)
+				echo "[ADV] Build: invalid parameter!"
+				echo "Usage: ${0} [OPTIONS]"
+				echo "This script build qualcomm bsp in this directory."
+				echo "It supports following options."
+				echo "OPTIONS:"
+				echo "        -amss				| Build amss images"
+				echo "        -ubuntu			| Build ubuntu images"
+				echo "Example: ./${0} -amss"
+				exit 1;
+				;;
+		esac
+	fi
 }
 
 function generate_md5()
