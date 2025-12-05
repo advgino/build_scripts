@@ -83,7 +83,7 @@ function build_image()
 	# scripts/build_release.sh -all -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
 
 	if [ $# -gt 0 ]; then
-		case ${$1} in
+		case ${1} in
 			"-amss")
 				echo "[ADV] Build: amss images"
 				script/build_release.sh -amss -qcs9075-iq-9075-evk -debug
@@ -127,7 +127,7 @@ function prepare_and_copy_images()
 	#mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
 	
 	# QIRP
-	mv qcom-robotics-full-image ${UFS_IMAGE_VER}
+	# mv qcom-robotics-full-image ${UFS_IMAGE_VER}
 	sudo tar czf ${UFS_IMAGE_VER}.tgz $UFS_IMAGE_VER
 	generate_md5 ${UFS_IMAGE_VER}.tgz
 	mv -f ${UFS_IMAGE_VER}.tgz* $OUTPUT_DIR
@@ -153,7 +153,7 @@ function generate_csv()
 	HASH_BSP=$(cd .repo/manifests && git rev-parse HEAD)
 	HASH_DOWNLOAD=$(cd download && git rev-parse HEAD)
 	HASH_KERNEL=$(cd kernel && git rev-parse HEAD)
-	HASH_SCRIPTS=$(cd scripts && git rev-parse HEAD)
+	HASH_SCRIPTS=$(cd script && git rev-parse HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV
 ESSD Software/OS Update News
@@ -220,7 +220,7 @@ get_source_code
 # update_oeminfo
 # get_downloads
 # set_environment
-build_image
+build_image "$@"
 prepare_and_copy_images
 prepare_and_copy_csv
 prepare_and_copy_log
