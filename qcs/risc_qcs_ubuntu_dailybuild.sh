@@ -1,6 +1,6 @@
 #!/bin/bash
 PRODUCT=$1
-
+set -x
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
