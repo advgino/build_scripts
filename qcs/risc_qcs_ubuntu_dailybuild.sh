@@ -14,6 +14,7 @@ echo "[ADV] CHIP_NAME=$CHIP_NAME"
 echo "[ADV] RAM_SIZE=$RAM_SIZE"
 echo "[ADV] STORAGE=$STORAGE"
 echo "[ADV] RELEASE_VERSION=$RELEASE_VERSION"
+echo "[ADV] YOCTO_MACHINE_NAME=$YOCTO_MACHINE_NAME"
 echo "[ADV] DISTRO_IMAGE = ${DISTRO_IMAGE}"
 
 CURR_PATH="$PWD"
@@ -23,9 +24,12 @@ IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_
 UFS_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
 EMMC_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
 
-
-# UFS_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/images/${STORAGE}"
-UFS_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/images"
+# QIMP
+#YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
+# QIRP
+#YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
+# Ubuntu
+YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/images/${YOCTO_MACHINE_NAME}"
 
 # ===========
 #  Functions
@@ -80,31 +84,7 @@ function build_image()
 {
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
-	# scripts/build_release.sh -all -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
-
-	if [ $# -gt 0 ]; then
-		case ${1} in
-			"-amss")
-				echo "[ADV] Build: amss images"
-				script/build_release.sh -amss -qcs9075-iq-9075-evk -debug
-				;;
-			"-ubuntu")
-				echo "[ADV] Build: ubuntu images"
-				script/build_release.sh -ubuntu -qcs9075-iq-9075-evk -debug
-				;;
-			*)
-				echo "[ADV] Build: invalid parameter!"
-				echo "Usage: ${0} [OPTIONS]"
-				echo "This script build qualcomm bsp in this directory."
-				echo "It supports following options."
-				echo "OPTIONS:"
-				echo "        -amss				| Build amss images"
-				echo "        -ubuntu			| Build ubuntu images"
-				echo "Example: ./${0} -amss"
-				exit 1;
-				;;
-		esac
-	fi
+	scripts/build_release.sh -${1} -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
 }
 
 function generate_md5()
@@ -121,13 +101,24 @@ function prepare_and_copy_images()
 {
 	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz."
 
-	pushd $UFS_IMAGE_DIR 2>&1 > /dev/null
+	pushd $YOCTO_IMAGE_DIR 2>&1 > /dev/null
 	# QIMP
-	#mv qcom-multimedia-image ${UFS_IMAGE_VER}
-	#mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
+	# mv qcom-multimedia-image ${UFS_IMAGE_VER}
+	# mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
 	
 	# QIRP
 	# mv qcom-robotics-full-image ${UFS_IMAGE_VER}
+	# mv qcom-robotics-full-image-emmc ${EMMC_IMAGE_VER}
+	# sudo tar czf ${UFS_IMAGE_VER}.tgz $UFS_IMAGE_VER
+	# sudo tar czf ${EMMC_IMAGE_VER}.tgz $EMMC_IMAGE_VER
+	# generate_md5 ${UFS_IMAGE_VER}.tgz
+	# generate_md5 ${EMMC_IMAGE_VER}.tgz
+	# mv -f ${UFS_IMAGE_VER}.tgz* $OUTPUT_DIR
+	# mv -f ${EMMC_IMAGE_VER}.tgz* $OUTPUT_DIR
+
+	# Ubuntu
+	# UFS
+	mv qcom-ubuntu-full-image ${UFS_IMAGE_VER}
 	sudo tar czf ${UFS_IMAGE_VER}.tgz $UFS_IMAGE_VER
 	generate_md5 ${UFS_IMAGE_VER}.tgz
 	mv -f ${UFS_IMAGE_VER}.tgz* $OUTPUT_DIR
@@ -172,7 +163,7 @@ Manifest, ${HASH_BSP}
 
 QCS_AMSS, ${HASH_AMSS}
 QCS_DOWNLOAD, ${HASH_DOWNLOAD}
-QCS_LINUX_QCOM, ${HASH_KERNEL}
+QCS_UBUNTU, ${HASH_KERNEL}
 QCS_SCRIPTS, ${HASH_SCRIPTS}
 
 END_OF_CSV
@@ -215,15 +206,37 @@ else
 	mkdir -p $OUTPUT_DIR
 fi
 
-#prepare source code and build environment
-get_source_code
-# update_oeminfo
-# get_downloads
-# set_environment
-build_image "$@"
-prepare_and_copy_images
-prepare_and_copy_csv
-prepare_and_copy_log
+
+if [ $# -gt 0 ]; then
+	case ${1} in
+		"-amss")
+			#prepare source code and build environment
+			get_source_code
+			# update_oeminfo
+			# get_downloads
+			# set_environment
+			build_image "$@"
+			;;
+		"-ubuntu")
+			build_image "$@"
+			prepare_and_copy_images
+			prepare_and_copy_csv
+			prepare_and_copy_log
+			;;
+		*)
+			echo "[ADV] Build: invalid parameter!"
+			echo "Usage: ${0} [OPTIONS]"
+			echo "This script build qualcomm bsp in this directory."
+			echo "It supports following options."
+			echo "OPTIONS:"
+			echo "        -amss				| Build amss images"
+			echo "        -ubuntu			| Build ubuntu images"
+			echo ""
+			echo "Example: ./${0} -amss"
+			exit 1;
+			;;
+	esac
+fi
 
 cd $CURR_PATH
 echo "[ADV] build script done!"
