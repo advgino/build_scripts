@@ -84,7 +84,7 @@ function build_image()
 {
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
-	scripts/build_release.sh -${1} -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
+	script/build_release.sh -${1} -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
 }
 
 function generate_md5()
