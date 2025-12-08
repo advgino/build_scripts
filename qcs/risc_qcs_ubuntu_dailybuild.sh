@@ -209,7 +209,7 @@ fi
 
 if [ $# -gt 0 ]; then
 	case ${1} in
-		"-amss")
+		"amss")
 			#prepare source code and build environment
 			get_source_code
 			# update_oeminfo
@@ -217,7 +217,7 @@ if [ $# -gt 0 ]; then
 			# set_environment
 			build_image "$@"
 			;;
-		"-ubuntu")
+		"ubuntu")
 			build_image "$@"
 			prepare_and_copy_images
 			prepare_and_copy_csv
