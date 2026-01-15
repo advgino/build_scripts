@@ -80,7 +80,7 @@ function build_image()
 {
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
-	script/build_release.sh -${BUILD_RELEASE_TYPE} -${UBUNTU_MACHINE} -${DISTRO_IMAGE}
+	scripts/build_release.sh -${BUILD_RELEASE_TYPE} -${UBUNTU_MACHINE} -${DISTRO_IMAGE}
 }
 
 function generate_md5()
