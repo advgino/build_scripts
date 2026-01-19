@@ -1,6 +1,6 @@
 #!/bin/bash
 PRODUCT=$1
-set -x
+
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
@@ -44,23 +44,38 @@ function get_source_code()
 
 function update_oeminfo()
 {
-	local ini_file="$ROOT_DIR/layers/meta-advantech/recipes-products/images/files/rootfs/etc/OEMInfo.ini"
+    local ini_file="$ROOT_DIR/tools/oeminfo/OEMInfo.ini"
 
-	if [ ! -f "$ini_file" ]; then
-		echo "[ERROR] File $ini_file not found!"
-		return 1
-	fi
+    if [ ! -f "$ini_file" ]; then
+        echo "[ERROR] File $ini_file not found!"
+        return 1
+    fi
 
-	echo "[INFO] Updating OEMInfo.ini ..."
-	echo "[INFO] Build_Date: $DATE"
-	echo "[INFO] Image_Version: v${RELEASE_VERSION}"
+    echo "[INFO] Updating OEMInfo.ini ..."
+    echo "[INFO] Chip_Name: ${CHIP_NAME}"
+    echo "[INFO] Product_Name: ${UBUNTU_MACHINE}"
+    echo "[INFO] Ram_Size: ${RAM_SIZE}"
+    echo "[INFO] OS_Distro: ${OS_DISTRO}"
+    echo "[INFO] Kernel_Version: ${KERNEL_VERSION}"
+    echo "[INFO] Build_Date: $DATE"
+    echo "[INFO] Image_Version: v${RELEASE_VERSION}"
 
-	# 更新 Build_Date
-	sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
-	# 更新 Image_Version
-	sed -i "s/^Image_Version:.*/Dailybuild_Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    # 更新 Chip_Name
+    sed -i "s/^Chip_Name:.*/Chip_Name: ${CHIP_NAME^^}/" "$ini_file"
+    # 更新 Product_Name 
+    sed -i "s/^Product_Name:.*/Product_Name: ${UBUNTU_MACHINE^^}/" "$ini_file"
+    # 更新 Ram_Size
+    sed -i "s/^Ram_Size:.*/Ram_Size: ${RAM_SIZE^^}/" "$ini_file"
+    # 更新 OS_Distro
+    sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_DISTRO}/" "$ini_file"
+    # 更新 Kernel_Version
+    sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION}/" "$ini_file"
+    # 更新 Build_Date
+    sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
+    # 更新 Image_Version
+    sed -i "s/^Image_Version:.*/Dailybuild_Image_Version: V${RELEASE_VERSION}/" "$ini_file"
 
-	echo "[INFO] Done updating $ini_file."
+    echo "[INFO] Done updating $ini_file."
 }
 
 function get_downloads()
@@ -101,7 +116,7 @@ function prepare_and_copy_images()
 	# QIMP
 	# mv qcom-multimedia-image ${UFS_IMAGE_VER}
 	# mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
-
+	
 	# QIRP
 	# mv qcom-robotics-full-image ${UFS_IMAGE_VER}
 	# mv qcom-robotics-full-image-emmc ${EMMC_IMAGE_VER}
@@ -133,7 +148,7 @@ function generate_csv()
 		set - `ls -l ${FILENAME}`; FILE_SIZE_BYTE=$5
 		set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
 	fi
-
+	
 	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 
 	HASH_BOOT_FW=$(cd boot-firmware && git rev-parse HEAD)
@@ -166,7 +181,7 @@ QCS_TOOLS, ${HASH_TOOLS}
 
 END_OF_CSV
 
-		popd
+	popd
 }
 
 function prepare_and_copy_csv()
@@ -207,7 +222,7 @@ fi
 
 #prepare source code and build environment
 get_source_code
-# update_oeminfo
+update_oeminfo
 # get_downloads
 # set_environment
 build_image
