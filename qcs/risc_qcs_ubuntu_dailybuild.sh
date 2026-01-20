@@ -67,9 +67,9 @@ function update_oeminfo()
     # 更新 Ram_Size
     sed -i "s/^Ram_Size:.*/Ram_Size: ${RAM_SIZE^^}/" "$ini_file"
     # 更新 OS_Distro
-    sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_DISTRO}/" "$ini_file"
+    sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_DISTRO^^}/" "$ini_file"
     # 更新 Kernel_Version
-    sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION}/" "$ini_file"
+    sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION#kernel-}/" "$ini_file"
     # 更新 Build_Date
     sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
     # 更新 Image_Version

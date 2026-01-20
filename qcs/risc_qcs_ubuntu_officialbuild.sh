@@ -333,30 +333,36 @@ function process_image() {
     echo "[INFO] Extracting ${daily_image}.tgz..."
     sudo tar -zxvf "${daily_image}.tgz"
 
-    # pushd "${daily_image}" >/dev/null
-    # mkdir -p rootfs
-    # sudo mount -o loop,offset=0 system.img rootfs
+    pushd "${daily_image}" >/dev/null
 
-    # # Find all OEMInfo.ini files dynamically
-    # pushd rootfs >/dev/null
-    # mapfile -t ini_files < <(sudo find . -type f -name "OEMInfo.ini")
+    local image=$(ls -t iot-*.img 2>/dev/null | head -1)
+    local fdisk_res=$(sudo fdisk -l -b 4096 "$image")
+    local start_sector=$(echo "$fdisk_res" | grep "${image}3" | awk '{print $2}')
+    local offsetp3=$((4096 * start_sector))
 
-    # if [ ${#ini_files[@]} -eq 0 ]; then
-    #     echo "[ERROR] OEMInfo.ini not found"
-    # fi
+    mkdir -p rootfs
+    sudo mount -o loop,offset=$offsetp3 $image rootfs
 
-    # # Add the Officialbuild_Image_Version
-    # for ini_file in "${ini_files[@]}"; do
-    #     echo "[INFO] Add the Officialbuild_Image_Version in $ini_file..."
-    #     sudo sed -i "/^\(Dailybuild_Image_Version\|Image_Version\):[[:space:]]*/a Officialbuild_Image_Version: V${RELEASE_VERSION}" "$ini_file"
-    # done
+    # Find all OEMInfo.ini files dynamically
+    pushd rootfs >/dev/null
+    mapfile -t ini_files < <(sudo find . -type f -name "OEMInfo.ini")
 
-    # popd >/dev/null
+    if [ ${#ini_files[@]} -eq 0 ]; then
+        echo "[ERROR] OEMInfo.ini not found"
+    fi
 
-    # sleep 1
-    # sudo umount rootfs
-    # sudo rm -rf rootfs
-    # popd >/dev/null
+    # Add the Officialbuild_Image_Version
+    for ini_file in "${ini_files[@]}"; do
+        echo "[INFO] Add the Officialbuild_Image_Version in $ini_file..."
+        sudo sed -i "/^\(Dailybuild_Image_Version\|Image_Version\):[[:space:]]*/a Officialbuild_Image_Version: V${RELEASE_VERSION}" "$ini_file"
+    done
+
+    popd >/dev/null
+
+    sleep 1
+    sudo umount rootfs
+    sudo rm -rf rootfs
+    popd >/dev/null
 
     mv "${daily_image}" "${official_image}"
 
@@ -377,7 +383,7 @@ prepare_official_package() {
     process_image "${DAILY_UFS_IMAGE_VER}" "${OFFICAL_UFS_IMAGE_VER}"
 
     # EMMC
-    process_image "${DAILY_EMMC_IMAGE_VER}" "${OFFICAL_EMMC_IMAGE_VER}"
+    # process_image "${DAILY_EMMC_IMAGE_VER}" "${OFFICAL_EMMC_IMAGE_VER}"
 
     # CSV
     echo "[INFO] Renaming CSV file..."
