@@ -336,9 +336,7 @@ function process_image() {
     pushd "${daily_image}" >/dev/null
 
     local image=$(ls -t iot-*.img 2>/dev/null | head -1)
-    local fdisk_res=$(sudo fdisk -l -b 4096 "$image")
-    local start_sector=$(echo "$fdisk_res" | grep "${image}3" | awk '{print $2}')
-    local offsetp3=$((4096 * start_sector))
+    local offsetp3=$((4096 * 139008))
 
     mkdir -p rootfs
     sudo mount -o loop,offset=$offsetp3 $image rootfs
